@@ -13,17 +13,25 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:       #0a0f1e;
-      --surface:  #111827;
-      --border:   rgba(255,255,255,0.07);
-      --text:     #f1f5f9;
-      --muted:    #64748b;
-      --dim:      #334155;
-      --common:   #16a34a;
-      --rare:     #b45309;
-      --super:    #dc2626;
-      --bonus:    #475569;
+      --bg:        #050d0a;
+      --surface:   #0a1a12;
+      --surface2:  #0f2318;
+      --border:    rgba(16, 185, 129, 0.12);
+      --border2:   rgba(16, 185, 129, 0.06);
+      --text:      #e2f5eb;
+      --muted:     #5a8a6a;
+      --dim:       #2d5040;
+      --emerald:   #10b981;
+      --cyan:      #06b6d4;
+      --common:    #22c55e;
+      --rare:      #f59e0b;
+      --super:     #ef4444;
+      --bonus:     #64748b;
+      --glow-em:   rgba(16, 185, 129, 0.25);
+      --glow-cy:   rgba(6, 182, 212, 0.2);
     }
+
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
 
     body {
       background: var(--bg);
@@ -31,6 +39,12 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       min-height: 100dvh;
       padding-bottom: env(safe-area-inset-bottom);
+      /* Subtle organic dot-grid texture */
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(16,185,129,0.04) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(6,182,212,0.03) 0%, transparent 50%),
+        radial-gradient(circle, rgba(16,185,129,0.06) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px;
     }
 
     /* ── Header ── */
@@ -38,11 +52,26 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      background: rgba(10, 15, 30, 0.92);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(5, 13, 10, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
-      padding: 16px 20px 14px;
+      padding: 14px 20px 12px;
+    }
+
+    /* Animated scan line */
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--emerald), transparent);
+      animation: scan 4s ease-in-out infinite;
+    }
+
+    @keyframes scan {
+      0%, 100% { opacity: 0; transform: scaleX(0); }
+      50% { opacity: 1; transform: scaleX(1); }
     }
 
     .header-inner {
@@ -50,21 +79,65 @@
       margin: 0 auto;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
 
-    .logo { font-size: 22px; }
+    /* Feather/leaf mark */
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--surface2), #0d2b1c);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 12px var(--glow-em);
+      flex-shrink: 0;
+    }
 
     .header-title {
       font-size: 18px;
       font-weight: 800;
       letter-spacing: -0.3px;
+      background: linear-gradient(135deg, #e2f5eb, var(--emerald));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .header-sub {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--muted);
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      letter-spacing: 0.5px;
       margin-top: 1px;
+    }
+
+    .header-ai-tag {
+      margin-left: auto;
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--emerald);
+      letter-spacing: 1px;
+      opacity: 0.6;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .ai-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--emerald);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--glow-em); }
+      50% { opacity: 0.7; box-shadow: 0 0 0 4px transparent; }
     }
 
     /* ── Main ── */
@@ -74,87 +147,129 @@
       padding: 0 16px;
     }
 
-    /* ── Stats bar ── */
-    .stats-bar {
-      display: flex;
+    /* ── Stats ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
       gap: 8px;
-      padding: 16px 0 12px;
-      overflow-x: auto;
-      scrollbar-width: none;
+      padding: 16px 0 4px;
     }
 
-    .stats-bar::-webkit-scrollbar { display: none; }
-
-    .stat-pill {
-      flex-shrink: 0;
+    .stat-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 8px 14px;
-      text-align: center;
+      border-radius: 14px;
+      padding: 14px 16px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .stat-pill .num {
-      font-size: 20px;
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--emerald), transparent);
+      opacity: 0.5;
+    }
+
+    .stat-card.wide {
+      grid-column: span 2;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .stat-num {
+      font-size: 36px;
       font-weight: 900;
       line-height: 1;
+      background: linear-gradient(135deg, var(--text), var(--emerald));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
-    .stat-pill .label {
-      font-size: 10px;
+    .stat-label {
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
       color: var(--muted);
-      letter-spacing: 0.8px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      margin-top: 2px;
+      margin-top: 4px;
+    }
+
+    .stat-rarity-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 6px;
     }
 
     /* ── Section header ── */
     .section-title {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      letter-spacing: 2px;
       text-transform: uppercase;
-      color: var(--dim);
-      margin: 20px 0 10px;
+      color: var(--emerald);
+      margin: 22px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0.8;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
     }
 
     /* ── Checklist ── */
     .checklist {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 14px;
       overflow: hidden;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
 
     .checklist-row {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border);
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border2);
+      transition: background 0.2s;
     }
 
     .checklist-row:last-child { border-bottom: none; }
+    .checklist-row:hover { background: rgba(16,185,129,0.04); }
 
-    .tier-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
+    .tier-indicator {
+      width: 3px;
+      height: 28px;
+      border-radius: 2px;
       flex-shrink: 0;
     }
 
     .tier-label {
-      font-size: 12px;
-      font-weight: 600;
-      width: 72px;
+      font-size: 11px;
+      font-weight: 700;
+      width: 68px;
       flex-shrink: 0;
+      letter-spacing: 0.3px;
     }
 
     .progress-wrap {
       flex: 1;
-      height: 6px;
-      background: rgba(255,255,255,0.06);
+      height: 5px;
+      background: rgba(255,255,255,0.04);
       border-radius: 3px;
       overflow: hidden;
     }
@@ -162,31 +277,49 @@
     .progress-bar {
       height: 100%;
       border-radius: 3px;
-      transition: width 0.6s ease;
+      transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
     }
 
-    .progress-count {
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      right: 0; top: -1px; bottom: -1px;
+      width: 4px;
+      border-radius: 2px;
+      filter: blur(2px);
+      background: inherit;
+    }
+
+    .checklist-count {
       font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
       color: var(--muted);
-      width: 36px;
+      width: 32px;
       text-align: right;
       flex-shrink: 0;
     }
 
-    /* ── Life list grid ── */
+    /* ── Grid ── */
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      padding-bottom: 32px;
+      padding-bottom: 36px;
     }
 
     .bird-card {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
+      border: 1px solid var(--border2);
+      border-radius: 14px;
       overflow: hidden;
       position: relative;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .bird-card:hover {
+      border-color: var(--border);
+      box-shadow: 0 4px 20px rgba(16,185,129,0.1);
     }
 
     .bird-card img {
@@ -202,83 +335,124 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 32px;
-      background: rgba(255,255,255,0.03);
+      font-size: 28px;
+      background: linear-gradient(135deg, var(--surface2), var(--surface));
+      position: relative;
+    }
+
+    /* Grid overlay on placeholder — AI aesthetic */
+    .bird-card .card-img-placeholder::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(16,185,129,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,185,129,0.05) 1px, transparent 1px);
+      background-size: 16px 16px;
     }
 
     .bird-card .card-info {
-      padding: 10px 12px 12px;
+      padding: 10px 12px 13px;
     }
 
-    .bird-card .card-rarity {
+    .card-rarity-pill {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 1.2px;
+      font-size: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      padding: 3px 7px;
-      border-radius: 3px;
-      margin-bottom: 6px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      margin-bottom: 7px;
+      border: 1px solid;
     }
 
-    .bird-card .card-name {
+    .card-name {
       font-size: 13px;
       font-weight: 700;
       line-height: 1.2;
       margin-bottom: 3px;
+      color: var(--text);
     }
 
-    .bird-card .card-sci {
+    .card-sci {
       font-size: 10px;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
       color: var(--muted);
+      margin-bottom: 5px;
       font-style: italic;
-      margin-bottom: 4px;
     }
 
-    .bird-card .card-date {
-      font-size: 10px;
+    .card-date {
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
       color: var(--dim);
+      letter-spacing: 0.3px;
     }
 
     .lifer-badge {
       position: absolute;
       top: 8px;
       right: 8px;
-      background: rgba(10,15,30,0.85);
-      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(5, 13, 10, 0.88);
+      border: 1px solid rgba(16,185,129,0.4);
       border-radius: 4px;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      padding: 2px 6px;
-      color: #fbbf24;
+      font-size: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      letter-spacing: 1px;
+      padding: 3px 7px;
+      color: var(--emerald);
+      box-shadow: 0 0 8px rgba(16,185,129,0.2);
+    }
+
+    /* Rarity glow strip at card top */
+    .rarity-strip {
+      height: 2px;
+      width: 100%;
     }
 
     /* ── States ── */
-    .loading, .empty {
+    .loading {
       text-align: center;
-      padding: 60px 20px;
+      padding: 80px 20px;
       color: var(--muted);
     }
 
-    .loading .spinner {
-      width: 28px;
-      height: 28px;
+    .spinner {
+      width: 32px;
+      height: 32px;
       border: 2px solid var(--border);
-      border-top-color: var(--text);
+      border-top-color: var(--emerald);
       border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 12px;
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto 14px;
+    }
+
+    .loading-label {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1px;
+      color: var(--emerald);
+      opacity: 0.7;
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    .empty {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
     .error-msg {
-      background: rgba(220, 38, 38, 0.1);
-      border: 1px solid rgba(220, 38, 38, 0.3);
-      border-radius: 10px;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 12px;
       padding: 16px;
       margin: 20px 0;
       font-size: 13px;
@@ -290,10 +464,14 @@
 <body>
   <header>
     <div class="header-inner">
-      <span class="logo">🦅</span>
+      <div class="logo-mark">🦅</div>
       <div>
         <div class="header-title">Birdfolio</div>
-        <div class="header-sub" id="header-region">Loading…</div>
+        <div class="header-sub" id="header-region">LOADING…</div>
+      </div>
+      <div class="header-ai-tag">
+        <div class="ai-dot"></div>
+        AI·LOG
       </div>
     </div>
   </header>
@@ -302,20 +480,21 @@
     <div id="app">
       <div class="loading">
         <div class="spinner"></div>
-        <div>Loading your life list…</div>
+        <div class="loading-label">SCANNING FIELD DATA…</div>
       </div>
     </div>
   </main>
 
   <script>
     const API = window.location.origin;
-    const telegramId = window.location.pathname.split("/").filter(Boolean).pop();
+    const parts = window.location.pathname.split("/").filter(Boolean);
+    const telegramId = parts[parts.length - 1];
 
     const RARITY = {
-      common:    { color: "#16a34a", label: "Common",    emoji: "🟢" },
-      rare:      { color: "#b45309", label: "Rare",      emoji: "🟡" },
-      superRare: { color: "#dc2626", label: "Super Rare", emoji: "🔴" },
-      bonus:     { color: "#475569", label: "Bonus",     emoji: "✨" },
+      common:    { color: "#22c55e", bg: "rgba(34,197,94,0.1)",   label: "COMMON",     emoji: "🟢" },
+      rare:      { color: "#f59e0b", bg: "rgba(245,158,11,0.1)",  label: "RARE",       emoji: "🟡" },
+      superRare: { color: "#ef4444", bg: "rgba(239,68,68,0.1)",   label: "SUPER RARE", emoji: "🔴" },
+      bonus:     { color: "#64748b", bg: "rgba(100,116,139,0.1)", label: "BONUS",      emoji: "✨" },
     };
 
     async function load() {
@@ -337,7 +516,7 @@
           return;
         }
 
-        document.getElementById("header-region").textContent = user.region;
+        document.getElementById("header-region").textContent = user.region.toUpperCase();
         document.title = `Birdfolio — ${user.region}`;
 
         render(buildPage(stats, sightings, checklist));
@@ -347,40 +526,38 @@
     }
 
     function buildPage(stats, sightings, checklist) {
+      const lifers = sightings.filter(s => s.is_lifer);
       return `
-        ${buildStats(stats)}
+        ${buildStats(stats, lifers.length)}
         <div class="section-title">Checklist</div>
         ${buildChecklist(checklist)}
-        <div class="section-title">Life List — ${sightings.filter(s => s.is_lifer).length} species</div>
-        ${buildGrid(sightings)}
+        <div class="section-title">Life List — ${lifers.length} species</div>
+        ${buildGrid(lifers)}
       `;
     }
 
-    function buildStats(stats) {
+    function buildStats(stats, speciesCount) {
       if (!stats) return "";
       const rarest = stats.rarest_bird;
-      const recent = stats.most_recent;
-      const rarityR = rarest ? (RARITY[rarest.rarity] || RARITY.bonus) : null;
+      const r = rarest ? (RARITY[rarest.rarity] || RARITY.bonus) : null;
 
       return `
-        <div class="stats-bar">
-          <div class="stat-pill">
-            <div class="num">${stats.total_species}</div>
-            <div class="label">Species</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num">${stats.total_species}</div>
+            <div class="stat-label">Species Found</div>
           </div>
-          <div class="stat-pill">
-            <div class="num">${stats.total_sightings}</div>
-            <div class="label">Sightings</div>
+          <div class="stat-card">
+            <div class="stat-num">${stats.total_sightings}</div>
+            <div class="stat-label">Total Sightings</div>
           </div>
           ${rarest ? `
-          <div class="stat-pill">
-            <div class="num">${rarityR.emoji}</div>
-            <div class="label">${rarest.common_name.split(" ").slice(-1)[0]}</div>
-          </div>` : ""}
-          ${recent ? `
-          <div class="stat-pill">
-            <div class="num">📍</div>
-            <div class="label">${recent.common_name.split(" ")[0]}</div>
+          <div class="stat-card wide">
+            <div>
+              <div class="stat-label">Rarest Find</div>
+              <div style="font-size:18px;font-weight:800;margin-top:4px;color:${r.color}">${rarest.common_name}</div>
+              <div class="stat-rarity-badge" style="color:${r.color}">${r.emoji} ${r.label}</div>
+            </div>
           </div>` : ""}
         </div>
       `;
@@ -392,10 +569,14 @@
         if (tiers[item.rarity_tier]) tiers[item.rarity_tier].push(item);
       });
 
+      if (!checklist.length) {
+        return `<div class="checklist"><div class="checklist-row" style="color:var(--muted);font-size:12px;font-family:monospace">// no checklist initialized</div></div>`;
+      }
+
       const rows = [
-        { key: "common",    label: "Common",     color: "#16a34a" },
-        { key: "rare",      label: "Rare",       color: "#b45309" },
-        { key: "superRare", label: "Super Rare", color: "#dc2626" },
+        { key: "common",    label: "Common",     color: "#22c55e" },
+        { key: "rare",      label: "Rare",       color: "#f59e0b" },
+        { key: "superRare", label: "Super Rare", color: "#ef4444" },
       ].map(({ key, label, color }) => {
         const items = tiers[key];
         if (!items.length) return "";
@@ -403,36 +584,37 @@
         const pct = items.length ? (found / items.length * 100) : 0;
         return `
           <div class="checklist-row">
-            <div class="tier-dot" style="background:${color}"></div>
+            <div class="tier-indicator" style="background:${color};box-shadow:0 0 6px ${color}60"></div>
             <div class="tier-label" style="color:${color}">${label}</div>
             <div class="progress-wrap">
-              <div class="progress-bar" style="width:${pct}%;background:${color}"></div>
+              <div class="progress-bar" style="width:${pct}%;background:linear-gradient(90deg,${color}90,${color});box-shadow:0 0 6px ${color}50"></div>
             </div>
-            <div class="progress-count">${found}/${items.length}</div>
+            <div class="checklist-count">${found}/${items.length}</div>
           </div>
         `;
       }).join("");
 
-      return `<div class="checklist">${rows || '<div class="checklist-row" style="color:var(--muted);font-size:13px">No checklist yet.</div>'}</div>`;
+      return `<div class="checklist">${rows}</div>`;
     }
 
-    function buildGrid(sightings) {
-      const lifers = sightings.filter(s => s.is_lifer);
+    function buildGrid(lifers) {
       if (!lifers.length) {
-        return `<div class="empty">No birds yet — start sending photos! 🦅</div>`;
+        return `<div class="empty" style="font-family:monospace;font-size:12px;color:var(--muted)">// no species logged yet<br>send a bird photo to begin</div>`;
       }
 
-      const cards = lifers.map(s => {
+      return `<div class="grid">${lifers.map(s => {
         const r = RARITY[s.rarity] || RARITY.bonus;
         const img = s.card_png_url
           ? `<img src="${s.card_png_url}" alt="${s.common_name}" loading="lazy">`
-          : `<div class="card-img-placeholder">🦅</div>`;
+          : `<div class="card-img-placeholder"><span style="position:relative;z-index:1">🦅</span></div>`;
+
         return `
           <div class="bird-card">
+            <div class="rarity-strip" style="background:linear-gradient(90deg,transparent,${r.color}60,transparent)"></div>
             ${img}
             ${s.is_lifer ? '<div class="lifer-badge">LIFER</div>' : ""}
             <div class="card-info">
-              <div class="card-rarity" style="background:${r.color}20;color:${r.color}">
+              <div class="card-rarity-pill" style="color:${r.color};background:${r.bg};border-color:${r.color}30">
                 ${r.emoji} ${r.label}
               </div>
               <div class="card-name">${s.common_name}</div>
@@ -441,16 +623,13 @@
             </div>
           </div>
         `;
-      }).join("");
-
-      return `<div class="grid">${cards}</div>`;
+      }).join("")}</div>`;
     }
 
     function render(html) {
       document.getElementById("app").innerHTML = html;
     }
 
-    // Register service worker
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/static/sw.js");
     }
