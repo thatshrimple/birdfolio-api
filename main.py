@@ -26,7 +26,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
+FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend")
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 
 @app.get("/health")
@@ -37,19 +38,16 @@ async def health():
 # ── PWA ───────────────────────────────────────────────────────────────────────
 
 def _app_html() -> str:
-    path = os.path.join(os.path.dirname(__file__), "frontend", "app.html")
+    path = os.path.join(FRONTEND_DIR, "app.html")
     with open(path, encoding="utf-8") as f:
         return f.read()
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/app", response_class=HTMLResponse)
 async def root():
     return HTMLResponse(_app_html())
 
-@app.get("/{telegram_id_str}", response_class=HTMLResponse)
+@app.get("/app/{telegram_id_str}", response_class=HTMLResponse)
 async def pwa_page(telegram_id_str: str):
-    # Only serve PWA for numeric IDs; let other routes fall through
-    if not telegram_id_str.isdigit():
-        raise HTTPException(status_code=404)
     return HTMLResponse(_app_html())
 
 
