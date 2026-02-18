@@ -9,8 +9,8 @@ from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(models.Base.metadata.create_all)
+    # Tables are created on first /health or /setup call — not at boot
+    # This avoids Railway internal network not being ready at container startup
     yield
 
 
@@ -27,6 +27,14 @@ app.add_middleware(
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.post("/setup")
+async def setup():
+    """Create all tables. Call once after first deploy."""
+    async with engine.begin() as conn:
+        await conn.run_sync(models.Base.metadata.create_all)
+    return {"status": "tables created"}
 
 
 # ── Users ────────────────────────────────────────────────────────────────────
