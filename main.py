@@ -1,10 +1,13 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 import models, schemas, crud
 from database import engine, get_db
 from contextlib import asynccontextmanager
+import os
 
 
 @asynccontextmanager
@@ -23,10 +26,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
 
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+# ── PWA ───────────────────────────────────────────────────────────────────────
+
+def _app_html() -> str:
+    path = os.path.join(os.path.dirname(__file__), "frontend", "app.html")
+    with open(path, encoding="utf-8") as f:
+        return f.read()
+
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    return HTMLResponse(_app_html())
+
+@app.get("/{telegram_id_str}", response_class=HTMLResponse)
+async def pwa_page(telegram_id_str: str):
+    # Only serve PWA for numeric IDs; let other routes fall through
+    if not telegram_id_str.isdigit():
+        raise HTTPException(status_code=404)
+    return HTMLResponse(_app_html())
 
 
 @app.post("/setup")
