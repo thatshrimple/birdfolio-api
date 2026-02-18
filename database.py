@@ -4,14 +4,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "")
+# Use public URL — psycopg3 handles Railway SSL cleanly
+DATABASE_URL = os.environ.get("DATABASE_PUBLIC_URL") or os.environ.get("DATABASE_URL", "")
 
-# Railway provides postgresql:// — SQLAlchemy async needs postgresql+asyncpg://
+# Railway provides postgresql:// — SQLAlchemy async needs postgresql+psycopg://
 if DATABASE_URL.startswith("postgresql://"):
-    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 
-# Use internal Railway URL (no SSL needed within the private network)
-engine = create_async_engine(DATABASE_URL, echo=False, connect_args={"ssl": False})
+engine = create_async_engine(DATABASE_URL, echo=False)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 
